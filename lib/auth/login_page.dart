@@ -1,4 +1,6 @@
-import 'package:chatapp_firebase/widgets/widgets.dart';
+import '../auth/register_page.dart';
+import '../widgets/widgets.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 class LoginPage extends StatefulWidget {
@@ -17,15 +19,15 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
-          appBar: AppBar(
-            backgroundColor: Theme.of(context).primaryColor,
-          ),
-          body: SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Form(
-                key: formKey,
-                child: Column(
+        appBar: AppBar(
+          backgroundColor: Theme.of(context).primaryColor,
+        ),
+        body: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Form(
+              key: formKey,
+              child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -56,6 +58,13 @@ class _LoginPageState extends State<LoginPage> {
                           email = val;
                         });
                       },
+                      validator: (val) {
+                        return RegExp(
+                                    r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
+                                .hasMatch(val!)
+                            ? null
+                            : "Please provide a valid email";
+                      },
                     ),
                     const SizedBox(height: 10),
                     TextFormField(
@@ -68,17 +77,69 @@ class _LoginPageState extends State<LoginPage> {
                           color: Theme.of(context).primaryColor,
                         ),
                       ),
+                      validator: (val) {
+                        if (val!.length < 6) {
+                          return 'Password must be at least 6 characters';
+                        } else {
+                          return null;
+                        }
+                      },
                       onChanged: (val) {
                         setState(() {
                           password = val;
                         });
                       },
                     ),
-                  ],
-                ),
-              ),
+                    const SizedBox(height: 20),
+                    SizedBox(
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Theme.of(context).primaryColor,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                          elevation: 0,
+                        ),
+                        onPressed: () {},
+                        child: const Text(
+                          'Sing in',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                          ),
+                        ),
+                      ),
+                    ),
+                    Text.rich(
+                      TextSpan(
+                        text: 'Don\'t have an account? ',
+                        style: const TextStyle(
+                          color: Colors.black,
+                          fontSize: 16,
+                        ),
+                        children: <TextSpan>[
+                          TextSpan(
+                            text: 'Register now',
+                            style: const TextStyle(
+                              color: Colors.black,
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              decoration: TextDecoration.underline,
+                            ),
+                            recognizer: TapGestureRecognizer()
+                              ..onTap = () {
+                                nextScreen(context, const RegisterPage());
+                                // navigate to desired screen
+                              },
+                          ),
+                        ],
+                      ),
+                    ),
+                  ]),
             ),
-          )),
+          ),
+        ),
+      ),
     );
   }
 }
