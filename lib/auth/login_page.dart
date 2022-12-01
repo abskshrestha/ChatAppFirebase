@@ -163,7 +163,7 @@ class _LoginPageState extends State<LoginPage> {
         _isLoading = true;
       });
       await authService
-          .loginUserWithEmailandPassword(email, password)
+          .loginWithUserEmailandPassword(email, password)
           .then((value) async {
         if (value == true) {
           QuerySnapshot snapshot =
@@ -172,10 +172,8 @@ class _LoginPageState extends State<LoginPage> {
 
           //saving the data to user preference
           await HelperFunctions.saveUserLoggedInStatus(true);
-
           await HelperFunctions.saveUserEmailSF(email);
           await HelperFunctions.saveUserNameSF(snapshot.docs[0]['fullName']);
-
           nextScreenReplace(context, const HomePage());
         } else {
           showSnackBar(context, Colors.red, value);
