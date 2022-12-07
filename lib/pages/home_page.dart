@@ -1,6 +1,9 @@
-import 'package:chatapp_firebase/service/auth_service.dart';
+import '../auth/login_page.dart';
+import '../pages/profile_page.dart';
+import '../service/auth_service.dart';
 import 'package:flutter/material.dart';
 import '../helper/helper_function.dart';
+import '../widgets/widgets.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -81,6 +84,9 @@ class _HomePageState extends State<HomePage> {
               thickness: 1,
             ),
             ListTile(
+              onTap: () {},
+              selectedTileColor: Theme.of(context).primaryColor,
+              selected: true,
               title: const Text(
                 'Groups',
                 style: TextStyle(
@@ -91,17 +97,15 @@ class _HomePageState extends State<HomePage> {
               ),
               contentPadding:
                   const EdgeInsets.symmetric(horizontal: 20, vertical: 2),
-              selectedColor: Theme.of(context).primaryColor,
-              selected: true,
               leading: const Icon(
                 Icons.group,
                 color: Colors.black,
               ),
-              onTap: () {},
+              iconColor: Theme.of(context).primaryColor,
             ),
             ListTile(
               title: const Text(
-                'Settings',
+                'Profile',
                 style: TextStyle(
                   fontSize: 16,
                   color: Colors.black,
@@ -110,12 +114,13 @@ class _HomePageState extends State<HomePage> {
               ),
               contentPadding:
                   const EdgeInsets.symmetric(horizontal: 20, vertical: 2),
-     
               leading: const Icon(
-                Icons.settings,
+                Icons.person,
                 color: Colors.black,
               ),
-              onTap: () {},
+              onTap: () {
+                nextScreen(context, const ProfilePage());
+              },
             ),
             ListTile(
               title: const Text(
@@ -128,14 +133,45 @@ class _HomePageState extends State<HomePage> {
               ),
               contentPadding:
                   const EdgeInsets.symmetric(horizontal: 20, vertical: 2),
-       
               leading: const Icon(
                 Icons.exit_to_app,
                 color: Colors.black,
               ),
-              onTap: () {},
+              onTap: () async {
+                showDialog(
+                    barrierDismissible: true,
+                    context: context,
+                    builder: (context) {
+                      return AlertDialog(
+                        title: Text('Are you sure?'),
+                        content: Text('Do you want to logout?'),
+                        actions: [
+                          IconButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                            icon: const Icon(Icons.cancel),
+                            color: Colors.red,
+                          ),
+                          IconButton(
+                              onPressed: () async {
+                                await authService
+                                    .signOut()
+                                    .whenComplete(() => const LoginPage());
+                                // pr you can do this
+                                // Navigator.pushReplacement(
+                                //     context,
+                                //     MaterialPageRoute(
+                                //         builder: (context) =>
+                                //             const LoginPage()));
+                              },
+                              icon: const Icon(Icons.done_rounded),
+                              color: Colors.green),
+                        ],
+                      );
+                    });
+              },
             ),
-
           ],
         ),
       ),
