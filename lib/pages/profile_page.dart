@@ -1,71 +1,36 @@
-import '../pages/search_page.dart';
+import 'package:chatapp_firebase/pages/home_page.dart';
+import 'package:chatapp_firebase/service/auth_service.dart';
+import 'package:flutter/material.dart';
 
 import '../auth/login_page.dart';
-import '../pages/profile_page.dart';
-import '../service/auth_service.dart';
-import 'package:flutter/material.dart';
-import '../helper/helper_function.dart';
 import '../widgets/widgets.dart';
 
-class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+class ProfilePage extends StatefulWidget {
+  String email;
+  String userName;
+
+  ProfilePage({
+    Key? key,
+    required this.email,
+    required this.userName,
+  }) : super(key: key);
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  State<ProfilePage> createState() => _ProfilePageState();
 }
 
-class _HomePageState extends State<HomePage> {
-  String email = "";
-  String userName = "";
-
-  @override
-  void initState() {
-    gettingUserData();
-    super.initState();
-  }
-
-  gettingUserData() async {
-    await HelperFunctions.getUserEmailFromSF().then((value) {
-      setState(() {
-        email = value!;
-      });
-    });
-
-    await HelperFunctions.getUserNameFromSF().then((val) {
-      setState(() {
-        userName = val!;
-      });
-    });
-  }
-
+class _ProfilePageState extends State<ProfilePage> {
   AuthService authService = AuthService();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Groups',
-          style: TextStyle(
-              color: Colors.white, fontWeight: FontWeight.bold, fontSize: 27),
-        ),
-        actions: [
-          IconButton(
-            onPressed: () {
-              nextScreen(context, const SearchPage());
-            },
-            icon: const Icon(Icons.search),
-          ),
-        ],
-        centerTitle: true,
         backgroundColor: Theme.of(context).primaryColor,
-        elevation: 0,
-      ),
-      body: Center(
-        child: ElevatedButton(
-          child: Text('Logout'),
-          onPressed: () {
-            authService.signOut();
-          },
+        title: const Text(
+          'Profile Page',
+          style: TextStyle(
+              color: Colors.white, fontSize: 27, fontWeight: FontWeight.bold),
         ),
       ),
       drawer: Drawer(
@@ -80,7 +45,7 @@ class _HomePageState extends State<HomePage> {
               height: 15,
             ),
             Text(
-              userName,
+              widget.userName,
               textAlign: TextAlign.center,
               style: const TextStyle(
                 fontSize: 16,
@@ -94,9 +59,9 @@ class _HomePageState extends State<HomePage> {
               thickness: 1,
             ),
             ListTile(
-              onTap: () {},
-              selectedTileColor: Theme.of(context).primaryColor,
-              selected: true,
+              onTap: () {
+                nextScreen(context, const HomePage());
+              },
               title: const Text(
                 'Groups',
                 style: TextStyle(
@@ -114,6 +79,8 @@ class _HomePageState extends State<HomePage> {
               iconColor: Theme.of(context).primaryColor,
             ),
             ListTile(
+              selectedTileColor: Theme.of(context).primaryColor,
+              selected: true,
               title: const Text(
                 'Profile',
                 style: TextStyle(
@@ -128,10 +95,7 @@ class _HomePageState extends State<HomePage> {
                 Icons.person,
                 color: Colors.black,
               ),
-              onTap: () {
-                nextScreenReplace(
-                    context, ProfilePage(email: email, userName: userName));
-              },
+              onTap: () {},
             ),
             ListTile(
               title: const Text(
@@ -167,7 +131,6 @@ class _HomePageState extends State<HomePage> {
                           IconButton(
                               onPressed: () async {
                                 await authService.signOut();
-
                                 Navigator.pushReplacement(
                                     context,
                                     MaterialPageRoute(
@@ -180,6 +143,65 @@ class _HomePageState extends State<HomePage> {
                       );
                     });
               },
+            ),
+          ],
+        ),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 150),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            const Icon(
+              Icons.account_circle,
+              size: 200,
+              color: Colors.black,
+            ),
+            const SizedBox(
+              height: 15,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Full Name ',
+                  style: TextStyle(
+                    fontSize: 17,
+                    color: Colors.black,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Text(
+                  widget.userName,
+                  style: TextStyle(
+                    fontSize: 17,
+                    color: Colors.black,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+            const Divider(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Email',
+                  style: TextStyle(
+                    fontSize: 17,
+                    color: Colors.black,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Text(
+                  widget.email,
+                  style: TextStyle(
+                    fontSize: 17,
+                    color: Colors.black,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
             ),
           ],
         ),
