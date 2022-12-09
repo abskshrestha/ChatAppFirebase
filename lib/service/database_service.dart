@@ -38,4 +38,28 @@ Future gettingUserData(String email) async {
 getUserGroups() async {
   return userCollection.doc(uid).snapshots();
 }
+
+//creating a group
+Future createGroup(String userName, String id, String groupName) async {
+  DocumentReference documentReference = await groupCollection.add({
+
+    "groupName": groupName,
+    "groupIcon": "",
+    "admin": "${id}_$groupName",
+    "members": [],
+    "groupId": "",
+    "recentMessages": "",
+    "recentMessageSender": "",
+
+
+  });
+
+
+
+
+
+
+
+  
+};
 }
