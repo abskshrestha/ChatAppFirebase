@@ -11,7 +11,7 @@ class DatabaseService {
       FirebaseFirestore.instance.collection('users');
 
   final CollectionReference groupCollection =
-      FirebaseFirestore.instance.collection('grpups');
+      FirebaseFirestore.instance.collection('groups');
 
   //saving the collection
   Future savingUserData(String fullName, String email) async {
@@ -24,42 +24,45 @@ class DatabaseService {
     });
   }
 
-
 //medium article change flutter database rules in firestore uid = uid
 
 //getting user data
-Future gettingUserData(String email) async {
-  QuerySnapshot snapshot = 
-    await userCollection.where("email", isEqualTo: email).get();
+  Future gettingUserData(String email) async {
+    QuerySnapshot snapshot =
+        await userCollection.where("email", isEqualTo: email).get();
     return snapshot;
-}
+  }
 
 //getting user groups
-getUserGroups() async {
-  return userCollection.doc(uid).snapshots();
-}
+  getUserGroups() async {
+    return userCollection.doc(uid).snapshots();
+  }
 
 //creating a group
-Future createGroup(String userName, String id, String groupName) async {
-  DocumentReference documentReference = await groupCollection.add({
+  Future createGroup(String userName, String id, String groupName) async {
+    DocumentReference groupDocumentReference = await groupCollection.add({
+      //documentrefernece is a
+      "groupName": groupName,
+      "groupIcon": "",
+      "admin": "${id}_$userName",
+      "members": [],
+      "groupId": "",
+      "recentMessages": "",
+      "recentMessageSender": "",
+    });
 
-    "groupName": groupName,
-    "groupIcon": "",
-    "admin": "${id}_$groupName",
-    "members": [],
-    "groupId": "",
-    "recentMessages": "",
-    "recentMessageSender": "",
+    //update the members
 
+    await groupDocumentReference.update({
+      "members": FieldValue.arrayUnion(["${id}_$userName"]),
+      "groupId": groupDocumentReference.id,
+    });
 
-  });
+    DocumentReference userDocumentReference = await userCollection.doc(uid);
 
-
-
-
-
-
-
-  
-};
+    return await userDocumentReference.update({
+      "groups":
+          FieldValue.arrayUnion(["$groupDocumentReference.id_$groupName"]),
+    });
+  }
 }

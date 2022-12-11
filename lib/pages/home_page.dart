@@ -1,4 +1,6 @@
 import 'package:chatapp_firebase/service/database_service.dart';
+import 'package:chatapp_firebase/widgets/group_tile.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 
@@ -22,12 +24,24 @@ class _HomePageState extends State<HomePage> {
   String email = "";
   String userName = "";
   Stream? groups;
+  bool _isLoading = false;
+  String groupName = "";
+
   AuthService authService = AuthService();
 
   @override
   void initState() {
     gettingUserData();
     super.initState();
+  }
+
+  // string manipulation
+  String getId(String res) {
+    return res.substring(0, res.indexOf("_"));
+  }
+
+  String getName(String res) {
+    return res.substring(res.indexOf("_") + 1);
   }
 
   gettingUserData() async {
@@ -205,16 +219,108 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  popUpDialog(BuildContext context) {}
+  popUpDialog(BuildContext context) {
+    showDialog(
+        barrierDismissible: false,
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: const Text('Create a group'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _isLoading
+                    ? const Center(
+                        child: CircularProgressIndicator(),
+                      )
+                    : TextField(
+                        onChanged: (val) {
+                          setState(() {
+                            groupName = val;
+                          });
+                        },
+                        style: const TextStyle(
+                          color: Colors.black,
+                        ),
+                        decoration: InputDecoration(
+                          enabledBorder: OutlineInputBorder(
+                            borderSide: BorderSide(
+                              color: Theme.of(context).primaryColor,
+                            ),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          errorBorder: OutlineInputBorder(
+                            borderSide: const BorderSide(color: Colors.red),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderSide: BorderSide(
+                                color: Theme.of(context).primaryColor),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                        ),
+                      ),
+              ],
+            ),
+            actions: [
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                style: ElevatedButton.styleFrom(
+                    backgroundColor: Theme.of(context).primaryColor),
+                child: const Text('Cancel'),
+              ),
+              ElevatedButton(
+                onPressed: () async {
+                  if (groupName != "") {
+                    setState(() {
+                      _isLoading = true;
+                    });
+                    DatabaseService(uid: FirebaseAuth.instance.currentUser!.uid)
+                        .createGroup(userName,
+                            FirebaseAuth.instance.currentUser!.uid, groupName)
+                        .whenComplete(() {
+                      _isLoading = false;
+                    });
+                    Navigator.of(context).pop();
+
+                    showSnackBar(
+                        context, Colors.green, "Group created successfully");
+                  }
+                },
+                style: ElevatedButton.styleFrom(
+                    backgroundColor: Theme.of(context).primaryColor),
+                child: const Text('Create'),
+              ),
+            ],
+          );
+        });
+  }
 
   groupList() {
     return StreamBuilder(
         stream: groups,
         builder: (context, AsyncSnapshot snapshot) {
+          // make some checks
           if (snapshot.hasData) {
             if (snapshot.data['groups'] != null) {
               if (snapshot.data['groups'].length != 0) {
-                return Text('Helloooooo');
+                return ListView.builder(
+                  itemCount: snapshot.data['groups'].length,
+                  itemBuilder: (context, index) {
+                    return GroupTile(
+                        groupId: getId(snapshot.data['groups'][index]),
+                        groupName: getName(snapshot.data['groups'][index]),
+                        userName: snapshot.data['fullName']);
+
+                    // int reverseIndex = snapshot.data['groups'].length - index - 1;
+                    // return GroupTile(
+                    //     groupId: getId(snapshot.data['groups'][reverseIndex]),
+                    //     groupName: getName(snapshot.data['groups'][reverseIndex]),
+                    //     userName: snapshot.data['fullName']);
+                  },
+                );
               } else
                 return noGroupWidget();
             } else
@@ -234,16 +340,21 @@ class _HomePageState extends State<HomePage> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
-        children: const [
-          Icon(
-            Icons.add_circle,
-            size: 75,
-            color: Colors.black,
+        children: [
+          GestureDetector(
+            onTap: () {
+              popUpDialog(context);
+            },
+            child: const Icon(
+              Icons.add_circle,
+              size: 75,
+              color: Colors.black,
+            ),
           ),
-          SizedBox(
+          const SizedBox(
             height: 20,
           ),
-          Text(
+          const Text(
             'You have not joined any group',
             textAlign: TextAlign.center,
             style: TextStyle(
@@ -252,10 +363,10 @@ class _HomePageState extends State<HomePage> {
               fontWeight: FontWeight.bold,
             ),
           ),
-          SizedBox(
+          const SizedBox(
             height: 10,
           ),
-          Text(
+          const Text(
             'Tap on the Add icon to create a group or search on the top to join an existing group',
             textAlign: TextAlign.center,
             style: TextStyle(
